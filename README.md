@@ -10,12 +10,12 @@ files under `src/main/resources`.
 ```kotlin
 plugins {
     java
-    id("io.github.larkbatis") version "0.1.0-SNAPSHOT"
+    id("io.github.larkbatis") version "0.1.0"
 }
 
 dependencies {
-    implementation("io.github.larkbatis:larkbatis-runtime:0.1.0-SNAPSHOT")
-    implementation("io.github.larkbatis:larkbatis-annotations:0.1.0-SNAPSHOT")
+    implementation("io.github.larkbatis:larkbatis-runtime:0.1.0")
+    implementation("io.github.larkbatis:larkbatis-annotations:0.1.0")
     // larkbatis-processor lands on annotationProcessor automatically
 }
 ```

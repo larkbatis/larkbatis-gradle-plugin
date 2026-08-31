@@ -12,6 +12,27 @@ section here does not get released.
 
 ### Added
 
+- **Mapper XML can live in more than one directory**, through a new
+  `larkbatis.mapperDirs` file collection:
+
+  ```kotlin
+  larkbatis {
+      mapperDirs.from("src/main/mappers", "src/main/legacy-mappers")
+  }
+  ```
+
+  Every directory is scanned recursively, and all of them reach javac in one
+  `-Alarkbatis.mapperDir` option — a repeated `-A` of the same name is the last
+  one javac reads, not the union. The XML under each is registered as a
+  `compileJava` input, so an edit in any of them regenerates.
+
+  `mapperDir` still takes a single directory and is scanned first. The
+  `src/main/resources` default now applies only when the build names neither:
+  listing mapper trees no longer quietly adds a resources directory nobody
+  mentioned. A directory reached through both properties is scanned once,
+  because scanning it twice makes the processor report every namespace in it as
+  declared by two files.
+
 - **`-parameters` is passed to `compileJava`**, controlled by
   `larkbatis.addParametersFlag` (default on). This was the one wiring step the
   first real migration still had to do by hand, and it is not a convenience:

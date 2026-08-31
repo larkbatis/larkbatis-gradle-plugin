@@ -22,7 +22,7 @@ dependencies {
 
 What the plugin does — and all it does:
 
-- passes `-Alarkbatis.mapperDir=<dir>` to `compileJava` (default:
+- passes `-Alarkbatis.mapperDir=<dirs>` to `compileJava` (default:
   `src/main/resources`; only files with a `<mapper>` root element are read,
   so other XML in the same tree is ignored),
 - registers the mapper XML files as inputs of `compileJava`, so editing a
@@ -40,6 +40,37 @@ larkbatis {
     addParametersFlag = false      // you already pass -parameters, or use @Param everywhere
 }
 ```
+
+### Mapper XML in more than one directory
+
+`mapperDirs` takes as many as the module has — rewritten mappers kept beside
+the legacy ones, or generated mapper XML under the build directory:
+
+```kotlin
+larkbatis {
+    mapperDirs.from("src/main/mappers", "src/main/legacy-mappers")
+}
+```
+
+Each is scanned recursively and all of them reach javac in a single
+`-Alarkbatis.mapperDir` option; a second `-A` of the same name would be the
+last one javac reads, not the union. The XML under every directory is an input
+of `compileJava`, so an edit in any of them regenerates.
+
+`mapperDir` and `mapperDirs` can both be set — the singular one is scanned
+first — and a directory named through both is scanned once. The
+`src/main/resources` default applies only when the build names neither, so
+listing mapper trees does not quietly add a resources directory nobody
+mentioned.
+
+Two directories declaring the same mapper namespace is a compile error rather
+than a last-one-wins merge: the two files disagree about one mapper and
+nothing in the build can say which was meant.
+
+The directories may sit anywhere, but every namespace found still has to name
+a mapper interface compiled in *this* project — a file that matches none is
+reported and ignored, so pointing at another module's mapper tree buys
+nothing.
 
 ### Why `-parameters`
 

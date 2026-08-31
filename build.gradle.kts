@@ -87,6 +87,10 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(gradleApi())
+    // Runs a real consumer build. The unit tests configure a project in
+    // memory, which is the wrong instrument for the configuration cache: that
+    // one only fails when Gradle tries to *store* the task graph.
+    testImplementation(gradleTestKit())
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -236,4 +236,62 @@ class LarkBatisPluginTest {
             }
         }
     }
+
+    // ── Processor options ────────────────────────────────────────────
+
+    @Test
+    void processorOptionsAreNotPassedByDefault() {
+        List<String> args = compilerArgsOf(apply());
+        for (String arg : args) {
+            if (arg.startsWith("-Alarkbatis.") && !arg.startsWith("-Alarkbatis.mapperDir=")) {
+                throw new AssertionError("unexpected processor option by default: " + arg);
+            }
+        }
+    }
+
+    @Test
+    void mapUnderscoreToCamelCasePassedWhenSet() {
+        Project project = apply();
+        project.getExtensions().getByType(LarkBatisExtension.class)
+                .getMapUnderscoreToCamelCase().set(false);
+        assertTrue(compilerArgsOf(project)
+                .contains("-Alarkbatis.mapUnderscoreToCamelCase=false"));
+    }
+
+    @Test
+    void typeHandlersPassedWhenSet() {
+        Project project = apply();
+        project.getExtensions().getByType(LarkBatisExtension.class)
+                .getTypeHandlers().set("com.example.Money:com.example.MoneyHandler");
+        assertTrue(compilerArgsOf(project).contains(
+                "-Alarkbatis.typeHandlers=com.example.Money:com.example.MoneyHandler"));
+    }
+
+    @Test
+    void registryPackagePassedWhenSet() {
+        Project project = apply();
+        project.getExtensions().getByType(LarkBatisExtension.class)
+                .getRegistryPackage().set("com.example.app");
+        assertTrue(compilerArgsOf(project)
+                .contains("-Alarkbatis.registryPackage=com.example.app"));
+    }
+
+    @Test
+    void springConfigPassedWhenSet() {
+        Project project = apply();
+        project.getExtensions().getByType(LarkBatisExtension.class)
+                .getSpringConfig().set(false);
+        assertTrue(compilerArgsOf(project)
+                .contains("-Alarkbatis.springConfig=false"));
+    }
+
+    @Test
+    void springConfigPackagePassedWhenSet() {
+        Project project = apply();
+        project.getExtensions().getByType(LarkBatisExtension.class)
+                .getSpringConfigPackage().set("com.example.config");
+        assertTrue(compilerArgsOf(project)
+                .contains("-Alarkbatis.springConfigPackage=com.example.config"));
+    }
 }
+

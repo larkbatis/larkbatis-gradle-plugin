@@ -13,6 +13,11 @@ import org.gradle.api.provider.Property;
  *     mapperDirs.from("src/main/legacy-mappers")                  // default: empty
  *     addProcessorDependency = false                              // default: true
  *     addParametersFlag = false                                   // default: true
+ *     mapUnderscoreToCamelCase = false                            // default: processor default (true)
+ *     typeHandlers = "com.example.Money:com.example.MoneyHandler" // default: none
+ *     registryPackage = "com.example.app"                         // default: processor default
+ *     springConfig = false                                        // default: processor default
+ *     springConfigPackage = "com.example.config"                  // default: processor default
  * }
  * }</pre>
  */
@@ -76,4 +81,54 @@ public abstract class LarkBatisExtension {
      * on every mapper parameter, which needs no parameter names at all.
      */
     public abstract Property<Boolean> getAddParametersFlag();
+
+    // ── Processor options ────────────────────────────────────────────
+    //
+    // Each property below maps to a -Alarkbatis.xxx option passed to javac.
+    // None have a convention: when unset, the plugin does not emit the
+    // option and the processor applies its own default.
+
+    /**
+     * {@code false} makes underscores significant when a ResultSet label is
+     * matched to a property — the behaviour MyBatis has with its setting of
+     * the same name off. The processor defaults to {@code true}.
+     *
+     * <p>Passed as {@code -Alarkbatis.mapUnderscoreToCamelCase}.
+     */
+    public abstract Property<Boolean> getMapUnderscoreToCamelCase();
+
+    /**
+     * A default handler per Java type: {@code javaType:handlerClass} pairs
+     * separated by commas — the build-time answer to a
+     * {@code mybatis-config.xml} {@code <typeHandlers>} block.
+     *
+     * <p>Passed as {@code -Alarkbatis.typeHandlers}.
+     */
+    public abstract Property<String> getTypeHandlers();
+
+    /**
+     * Package for the generated {@code LarkBatisMappers} registry class.
+     * When unset, the processor picks the common package prefix of all
+     * mappers.
+     *
+     * <p>Passed as {@code -Alarkbatis.registryPackage}.
+     */
+    public abstract Property<String> getRegistryPackage();
+
+    /**
+     * {@code false} suppresses the generated Spring {@code @Configuration}.
+     * When unset, the processor emits it when spring-context is on the
+     * build classpath.
+     *
+     * <p>Passed as {@code -Alarkbatis.springConfig}.
+     */
+    public abstract Property<Boolean> getSpringConfig();
+
+    /**
+     * Package for the generated Spring {@code @Configuration} class.
+     * When unset, it lands in the same package as the registry.
+     *
+     * <p>Passed as {@code -Alarkbatis.springConfigPackage}.
+     */
+    public abstract Property<String> getSpringConfigPackage();
 }

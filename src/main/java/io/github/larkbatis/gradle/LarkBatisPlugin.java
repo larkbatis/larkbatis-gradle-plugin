@@ -16,6 +16,7 @@ import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.JavaExec;
@@ -98,7 +99,12 @@ public final class LarkBatisPlugin implements Plugin<Project> {
                                 project.files(dirs).getAsFileTree()
                                         .matching(filter -> filter.include("**/*.xml")),
                                 extension.getAddParametersFlag(),
-                                compile.getOptions().getCompilerArgs());
+                                compile.getOptions().getCompilerArgs(),
+                                extension.getMapUnderscoreToCamelCase(),
+                                extension.getTypeHandlers(),
+                                extension.getRegistryPackage(),
+                                extension.getSpringConfig(),
+                                extension.getSpringConfigPackage());
                         compile.getOptions().getCompilerArgumentProviders().add(arguments);
                     });
             registerScanTask(project);
@@ -139,7 +145,7 @@ public final class LarkBatisPlugin implements Plugin<Project> {
     private static String joinPaths(List<File> dirs) {
         StringBuilder joined = new StringBuilder();
         for (File dir : dirs) {
-            if (joined.length() > 0) {
+            if (!joined.isEmpty()) {
                 joined.append(File.pathSeparatorChar);
             }
             joined.append(dir.getPath());
@@ -194,13 +200,28 @@ public final class LarkBatisPlugin implements Plugin<Project> {
         private final Provider<Boolean> addParametersFlag;
         /** The task's own {@code compilerArgs}, read late so a manual flag wins. */
         private final List<String> compilerArgs;
+        private final Provider<Boolean> mapUnderscoreToCamelCase;
+        private final Provider<String> typeHandlers;
+        private final Provider<String> registryPackage;
+        private final Provider<Boolean> springConfig;
+        private final Provider<String> springConfigPackage;
 
         MapperXmlArguments(Provider<String> mapperDirs, FileTree mapperXml,
-                Provider<Boolean> addParametersFlag, List<String> compilerArgs) {
+                Provider<Boolean> addParametersFlag, List<String> compilerArgs,
+                Provider<Boolean> mapUnderscoreToCamelCase,
+                Provider<String> typeHandlers,
+                Provider<String> registryPackage,
+                Provider<Boolean> springConfig,
+                Provider<String> springConfigPackage) {
             this.mapperDirs = mapperDirs;
             this.mapperXml = mapperXml;
             this.addParametersFlag = addParametersFlag;
             this.compilerArgs = compilerArgs;
+            this.mapUnderscoreToCamelCase = mapUnderscoreToCamelCase;
+            this.typeHandlers = typeHandlers;
+            this.registryPackage = registryPackage;
+            this.springConfig = springConfig;
+            this.springConfigPackage = springConfigPackage;
         }
 
         @InputFiles
@@ -219,6 +240,36 @@ public final class LarkBatisPlugin implements Plugin<Project> {
             return addParametersFlag;
         }
 
+        @Input
+        @Optional
+        public Provider<Boolean> getMapUnderscoreToCamelCase() {
+            return mapUnderscoreToCamelCase;
+        }
+
+        @Input
+        @Optional
+        public Provider<String> getTypeHandlers() {
+            return typeHandlers;
+        }
+
+        @Input
+        @Optional
+        public Provider<String> getRegistryPackage() {
+            return registryPackage;
+        }
+
+        @Input
+        @Optional
+        public Provider<Boolean> getSpringConfig() {
+            return springConfig;
+        }
+
+        @Input
+        @Optional
+        public Provider<String> getSpringConfigPackage() {
+            return springConfigPackage;
+        }
+
         @Override
         public Iterable<String> asArguments() {
             List<String> arguments = new ArrayList<>();
@@ -229,7 +280,24 @@ public final class LarkBatisPlugin implements Plugin<Project> {
             if (addParametersFlag.get() && !compilerArgs.contains(PARAMETERS_FLAG)) {
                 arguments.add(PARAMETERS_FLAG);
             }
+            if (mapUnderscoreToCamelCase.isPresent()) {
+                arguments.add("-Alarkbatis.mapUnderscoreToCamelCase="
+                        + mapUnderscoreToCamelCase.get());
+            }
+            if (typeHandlers.isPresent()) {
+                arguments.add("-Alarkbatis.typeHandlers=" + typeHandlers.get());
+            }
+            if (registryPackage.isPresent()) {
+                arguments.add("-Alarkbatis.registryPackage=" + registryPackage.get());
+            }
+            if (springConfig.isPresent()) {
+                arguments.add("-Alarkbatis.springConfig=" + springConfig.get());
+            }
+            if (springConfigPackage.isPresent()) {
+                arguments.add("-Alarkbatis.springConfigPackage=" + springConfigPackage.get());
+            }
             return arguments;
         }
     }
 }
+

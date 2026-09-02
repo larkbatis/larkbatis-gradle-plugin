@@ -10,7 +10,7 @@ files under `src/main/resources`.
 ```kotlin
 plugins {
     java
-    id("io.github.larkbatis") version "0.1.0"
+    id("io.github.larkbatis") version "0.1.2"
 }
 
 dependencies {

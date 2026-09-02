@@ -30,6 +30,11 @@ on:
       core-version:
         description: "Released larkbatis core version to build against (default: the value in gradle.properties)"
         required: false
+      publish-to-central:
+        description: "Publish to Maven Central (uncheck to skip Maven Central and only publish to Gradle Portal)"
+        required: false
+        default: true
+        type: boolean
       dry-run:
         description: "Build and validate the bundle, upload nothing, create no release"
         required: false
@@ -137,12 +142,14 @@ jobs:
         run: ./gradlew build validatePlugins -Pversion=${{ steps.target.outputs.version }} -PlarkbatisCoreVersion=${{ steps.target.outputs.core-version }} -PuseLocalCore=false
 
       - name: Publish the signed bundle into build/central-bundle
+        if: ${{ github.event_name == 'push' || inputs.publish-to-central }}
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: ./gradlew publishAllPublicationsToCentralBundleRepository -Pversion=${{ steps.target.outputs.version }} -PlarkbatisCoreVersion=${{ steps.target.outputs.core-version }} -PuseLocalCore=false
 
       - name: Upload to the Central Portal
+        if: ${{ github.event_name == 'push' || inputs.publish-to-central }}
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
